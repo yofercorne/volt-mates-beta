@@ -1162,17 +1162,51 @@
       this.status(
         role === "host" ? "Registrando la sala…" : "Buscando la sala y negociando la conexión…",
       );
+      let signalingOpened = false;
+      // Distinguir el acceso al servicio de salas del enlace WebRTC entre pilotos.
+      const report = (type, error) => {
+        const options = this.peer?.options;
+        console.warn("[Volt-Mates] Conexión online", {
+          type,
+          stage:
+            !signalingOpened ||
+            [
+              "network",
+              "server-error",
+              "socket-error",
+              "socket-closed",
+              "invalid-key",
+              "disconnected",
+            ].includes(type)
+              ? "signaling"
+              : "webrtc",
+          signalingOpened,
+          server: options ? `${options.host}:${options.port}${options.path}` : "0.peerjs.com:443/",
+          secure: options?.secure,
+          online: navigator.onLine,
+          message: error?.message || "",
+        });
+      };
       try {
+        // El sitio publicado usa HTTPS; la señalización debe usar WSS.
+        const options = { debug: 1, secure: true };
         this.peer =
           role === "host"
-            ? new Peer("vm4-" + code.toLowerCase(), { debug: 0 })
-            : new Peer({ debug: 0 });
+            ? new Peer("vm4-" + code.toLowerCase(), options)
+            : new Peer(options);
         this.setupTimer = this.schedule(() => {
-          if (token === this.attempt && !this.ready)
-            this.fail("La conexión tardó demasiado. Prueba otra sala o revisa la red.");
+          if (token === this.attempt && !this.ready) {
+            report("setup-timeout");
+            this.fail(
+              signalingOpened
+                ? "La sala respondió, pero no se pudo enlazar a los pilotos. Prueba otra red."
+                : "El servicio de salas no respondió. Prueba otra red y vuelve a intentarlo.",
+            );
+          }
         }, 20000);
         this.peer.on("open", () => {
           if (token !== this.attempt) return;
+          signalingOpened = true;
           if (role === "host") {
             clearTimeout(this.setupTimer);
             this.timers.delete(this.setupTimer);
@@ -1204,6 +1238,7 @@
         });
         this.peer.on("error", (error) => {
           if (token !== this.attempt) return;
+          report(error.type, error);
           if (
             this.connection?.open &&
             ["network", "server-error", "socket-error", "socket-closed"].includes(error.type)
@@ -1215,7 +1250,11 @@
             "unavailable-id": "Ese código ya está ocupado. Crea otra sala.",
             "browser-incompatible":
               "Este navegador no admite WebRTC. Prueba Chrome, Edge o Firefox actualizado.",
-            network: "No se pudo acceder al servidor de señalización.",
+            network: "No se pudo conectar al servicio de salas. Prueba otra red y vuelve a intentarlo.",
+            "server-error": "El servicio de salas no está disponible. Vuelve a intentarlo.",
+            "socket-error": "La red bloqueó o interrumpió la conexión con el servicio de salas.",
+            "socket-closed": "Se cerró la conexión con el servicio de salas. Vuelve a intentarlo.",
+            "invalid-key": "El servicio de salas rechazó la configuración de PeerJS.",
             webrtc: "La red no permitió establecer el enlace WebRTC.",
           };
           this.fail(
@@ -1225,9 +1264,11 @@
         });
         this.peer.on("disconnected", () => {
           if (token !== this.attempt || this.connection?.open) return;
+          report("disconnected");
           this.fail("Se perdió la conexión con el servicio de salas.");
         });
-      } catch {
+      } catch (error) {
+        report("initialization-error", error);
         this.fail("No se pudo iniciar WebRTC en este navegador.");
       }
     }
