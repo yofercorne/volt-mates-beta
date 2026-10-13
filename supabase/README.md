@@ -1,6 +1,6 @@
 # Activar el ranking global de Volt-Mates
 
-El adaptador está preparado, pero esta entrega no contiene un proyecto Supabase configurado. Hasta conectarlo, se utiliza la clasificación de este dispositivo.
+La beta incluye en ranking-config.js el proyecto y la clave pública facilitados por el usuario. Se verificó la lectura del ranking real. Los pasos siguientes permiten configurar otro proyecto; sin configuración funciona la clasificación de este dispositivo.
 
 ## Configuración
 
@@ -38,4 +38,4 @@ Los envíos fallidos se guardan y se reintentan al abrir la clasificación globa
 Se ordena por más puntos, más oleadas y menor tiempo, con fecha y UUID como desempates estables.
 Los nombres son alias públicos, no cuentas reservadas. La clasificación es comunitaria: el juego sigue siendo P2P y la función SQL valida datos, pero no puede certificar que un cliente modificado haya jugado realmente esa partida. Para un torneo con validación fuerte habría que añadir autenticación, límites de envío y verificación de partidas en un servidor.
 
-No se ha desplegado ni probado contra una cuenta real: no se ha facilitado ninguna. El esquema, la vista, los permisos y la función se verificaron en PostgreSQL local con PGlite. El cliente se verifica mediante respuestas HTTP controladas; la sincronización P2P se prueba con WebRTC real.
+Se verificó la lectura del ranking en el proyecto Supabase real y desde la beta publicada. No se enviaron nuevas puntuaciones durante el diagnóstico. El esquema, la vista, los permisos y la función se verificaron en PostgreSQL local con PGlite. El envío y sus reintentos se verificaron mediante respuestas HTTP controladas; la sincronización P2P se probó con WebRTC real.
