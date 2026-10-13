@@ -7,6 +7,27 @@ Dos pilotos unidos por un rayo. Seis oleadas, decisiones compartidas y el núcle
 Abre index.html. Conserva a su lado style.css, game.js, expedition.js, assets.js, ranking.js y ranking-config.js. No requiere instalar nada.
 Phaser 3.90.0 y PeerJS 1.5.5 se cargan desde CDN, por lo que el primer inicio necesita internet.
 También se puede servir como sitio estático en GitHub Pages o Vercel.
+Conserva también favicon.svg y favicon.ico al publicar, para evitar solicitudes de iconos inexistentes.
+
+## Diagnosticar la conexión online
+
+El ranking usa Supabase; las salas usan PeerJS Cloud (0.peerjs.com, puerto 443, HTTPS/WSS).
+Son servicios independientes: una consulta correcta al ranking no prueba el acceso al servicio de salas.
+
+Si un piloto no puede crear o unirse a una sala, abre las herramientas del navegador y revisa Network/Red
+y Console/Consola. El juego registra `[Volt-Mates] Conexión online`, con el tipo de error, servidor y etapa:
+`signaling` identifica un fallo de acceso al servicio de salas; `webrtc` identifica la etapa del enlace
+entre pilotos. `signalingOpened` indica si el servicio ya había respondido antes del fallo. Un evento
+tardío también puede indicar que se perdió la señalización después de abrirla; el campo `type` permite distinguirlo.
+
+Ante un fallo de señalización, prueba el navegador sin extensiones y una conexión distinta (por ejemplo,
+un punto de acceso móvil). Comprueba que la red permita WebSockets seguros hacia 0.peerjs.com y que
+la política Content-Security-Policy del despliegue no los bloquee. Cambiar la clave Supabase no soluciona
+esa conexión. En cambio, si la sala responde pero falla WebRTC entre redes distintas, revisa NAT/firewall
+y la disponibilidad de un servidor TURN; cambiar únicamente el alojamiento estático no resuelve ese caso.
+
+Para compartir un diagnóstico, copia el registro del juego y la URL/estado de la petición fallida.
+No hace falta compartir contraseñas ni claves secretas de Supabase.
 
 ## Controles
 
@@ -75,8 +96,8 @@ Las partidas terminadas con puntos entran al ranking de dúos. Se muestra la mej
 Orden: más puntos, más oleadas, menor tiempo. Reabrir resultados no duplica la entrada.
 
 Este dispositivo: clasificación local persistente, funcional sin backend.
-Global: integración Supabase preparada, pendiente de conectar. No está desplegada ni conectada a una cuenta.
-Para activarla, ejecuta supabase/ranking.sql en tu proyecto y completa la URL y clave pública en ranking-config.js. Instrucciones en supabase/README.md.
+Global: configurado con la URL y clave pública facilitadas para la beta. Se verificó la lectura del ranking real.
+Para usar otro proyecto, ejecuta supabase/ranking.sql y completa la URL y clave pública en ranking-config.js. Instrucciones en supabase/README.md.
 El anfitrión registra la partida online; el invitado conserva una copia local. Los fallos de red se guardan para reintentar.
 
 Nuevos archivos:
@@ -86,4 +107,5 @@ Nuevos archivos:
 
 El título del menú se adapta a la altura disponible. Se retiraron la bitácora y los apagones.
 
-Verificación adicional: ocho tamaños del menú, nombres persistentes y congelados por partida, ranking idempotente, seis pruebas del adaptador REST con respuestas controladas y cinco comprobaciones SQL en un motor PostgreSQL local (PGlite). El ranking no se ha probado contra un proyecto Supabase real porque aún no existe.
+Verificación adicional: ocho tamaños del menú, nombres persistentes y congelados por partida, ranking idempotente, seis pruebas del adaptador REST con respuestas controladas y cinco comprobaciones SQL en un motor PostgreSQL local (PGlite).
+La revisión de la beta publicada verificó creación y unión de sala, inicio y pausa compartida desde dos sesiones independientes en la misma conexión de pruebas, y lectura de Supabase real. Se repitió con la corrección local. No se enviaron puntuaciones a la base real durante ese diagnóstico; tampoco se reprodujo la red de la persona afectada.
