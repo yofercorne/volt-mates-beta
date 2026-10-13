@@ -1,0 +1,125 @@
+{
+  "version": 7,
+  "localChecks": [
+    "Siete opciones completamente visibles en ocho tamaños; bitácora eliminada",
+    "Nombres con WASD se escriben, guardan y aparecen en el menú",
+    "Identidad fijada al iniciar; los apagones ya no pueden activarse ni recibirse por red",
+    "Resultado con nombre del dúo; volver a abrir el ranking no duplica la partida",
+    "Mejor resultado por pareja, orden de puntos y desempate por tiempo; datos inválidos rechazados",
+    "El ranking global sin configurar se identifica claramente",
+    "Ranking e identidad persisten tras recargar y formulario adaptable",
+    "Ranking y nombres también cargan con file://"
+  ],
+  "layouts": [
+    {
+      "width": 1366,
+      "height": 768,
+      "title": 92,
+      "bottom": 672.65625,
+      "top": 348.65625,
+      "footer": 716,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "title": 86.4,
+      "bottom": 643.96875,
+      "top": 319.96875,
+      "footer": 668,
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "title": 68,
+      "bottom": 528.296875,
+      "top": 260.296875,
+      "footer": 558,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "title": 92,
+      "bottom": 738.65625,
+      "top": 414.65625,
+      "footer": 848,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "title": 39,
+      "bottom": 341.109375,
+      "top": 165.375,
+      "footer": 354,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "title": 52,
+      "bottom": 663.859375,
+      "top": 359.859375,
+      "footer": 811,
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "title": 52,
+      "bottom": 561.859375,
+      "top": 257.859375,
+      "footer": 607,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 600,
+      "title": 68,
+      "bottom": 528.296875,
+      "top": 260.296875,
+      "footer": 558,
+      "overflow": false
+    }
+  ],
+  "onlineChecks": [
+    "Sala pública PeerJS y canal WebRTC real entre dos contextos independientes",
+    "Nombres del dúo y pilotos sincronizados en el lobby; el invitado sólo cambia su nombre",
+    "Cuenta atrás sincronizada y simulación exclusiva del anfitrión",
+    "Controles separados: Ion sólo en el anfitrión, Flux por WASD en el invitado",
+    "Pausa del invitado congela enemigos, daño, salud, vínculo y tiempo para ambos",
+    "Ningún piloto puede reanudar mientras su compañero mantiene la pausa",
+    "Consultar ajustes durante una pausa remota mantiene la pausa compartida",
+    "9 snapshots inválidos rechazados; entradas imposibles y puntuaciones del cliente ignoradas",
+    "Tres mejoras iguales en ambos equipos; los votos distintos esperan y el consenso aplica una sola mejora",
+    "Una pausa recibida durante la elección permanece activa después del consenso",
+    "Evento y rescate sincronizados; la pausa detiene sus temporizadores",
+    "Taller online: el invitado equipa a Flux y el anfitrión recibe su apariencia",
+    "6 estados de expansión manipulados rechazados",
+    "Derrota, estadísticas y récord sincronizados sin simulación duplicada",
+    "Un UUID compartido, una entrada por navegador y ranking estable durante los resultados online",
+    "El invitado puede pedir reintento aunque el anfitrión consulte el ranking: nueva ronda, salud y puntuación restauradas",
+    "Paquetes de rondas anteriores no afectan al reintento",
+    "Desconexión segura, limpieza de recursos y regreso al juego local",
+    "Sin errores JavaScript en anfitrión ni invitado"
+  ],
+  "supabaseAdapterChecks": [
+    "Fallo de envío: resultado local conservado y marcado para reintento",
+    "Reintento por RPC, UUID idempotente, fecha del servidor y lectura global con clave pública",
+    "Actualizar la clasificación no duplica ni vuelve a enviar el resultado",
+    "Un envío pendiente rechazado no impide consultar los resultados globales disponibles",
+    "Una respuesta global atrasada no reemplaza la clasificación local",
+    "Claves secretas y service_role rechazadas en la configuración del cliente"
+  ],
+  "postgresChecks": [
+    "Migración SQL aplicada dos veces sin perder datos ni permisos",
+    "RPC accesible a anon, idempotencia por UUID y fecha fijada por el servidor",
+    "Anon puede leer, pero no insertar, actualizar ni borrar directamente",
+    "UUID inválido, números negativos o decimales, nombres inseguros y métricas imposibles rechazados",
+    "Vista conserva sólo la mejor partida del dúo aunque intercambien sus puestos"
+  ],
+  "errors": [],
+  "globalStatus": "Integración preparada; no existe todavía un proyecto Supabase conectado."
+}

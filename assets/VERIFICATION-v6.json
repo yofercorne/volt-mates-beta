@@ -1,0 +1,97 @@
+{
+  "phase": 6,
+  "localChecks": [
+    "Taller: bloqueos, metas, dos pilotos, accesorios y equipo persistente",
+    "Tres mejoras sin duplicados: simulación congelada y selección local aplicada",
+    "Mejoras con efectos reales sobre daño, distancia, velocidad, recuperación y aturdimiento",
+    "Eventos: aviso antes del daño, interruptores simultáneos y apagón visual",
+    "Rescate: piloto inmóvil, proximidad sostenida, salud restaurada y una oportunidad por piloto",
+    "Guardián, separador, fuga y jefe: comportamientos distintos y estado de red válido",
+    "Victoria al completar la oleada 6: recompensa de jefe y corona permanente, sin duplicar progreso",
+    "Siete opciones y taller adaptables en móvil y horizontal",
+    "Expedición y taller cargan también con file://"
+  ],
+  "onlineChecks": [
+    "Sala pública PeerJS y canal WebRTC real entre dos contextos independientes",
+    "Cuenta atrás sincronizada y simulación exclusiva del anfitrión",
+    "Controles separados: Ion sólo en el anfitrión, Flux por WASD en el invitado",
+    "Pausa del invitado congela enemigos, daño, salud, vínculo y tiempo para ambos",
+    "Ningún piloto puede reanudar mientras su compañero mantiene la pausa",
+    "Consultar ajustes durante una pausa remota mantiene la pausa compartida",
+    "9 snapshots inválidos rechazados; entradas imposibles y puntuaciones del cliente ignoradas",
+    "Tres mejoras iguales en ambos equipos; los votos distintos esperan y el consenso aplica una sola mejora",
+    "Una pausa recibida durante la elección permanece activa después del consenso",
+    "Evento y rescate sincronizados; la pausa detiene sus temporizadores",
+    "Taller online: el invitado equipa a Flux y el anfitrión recibe su apariencia",
+    "6 estados de expansión manipulados rechazados",
+    "Derrota, estadísticas y récord sincronizados sin simulación duplicada",
+    "El invitado puede pedir reintento: nueva ronda, salud y puntuación restauradas",
+    "Paquetes de rondas anteriores no afectan al reintento",
+    "Desconexión segura, limpieza de recursos y regreso al juego local",
+    "Sin errores JavaScript en anfitrión ni invitado"
+  ],
+  "transport": {
+    "state": "connected",
+    "channel": "open",
+    "host": "0.peerjs.com"
+  },
+  "errors": [],
+  "rendering": "Shader de color en WebGL, mitad del vínculo para cada piloto, HUD de eventos, jefe y rescate.",
+  "expedition": {
+    "ended": true,
+    "won": true,
+    "waves": 6,
+    "kills": 55,
+    "drafts": [
+      {
+        "wave": 2,
+        "offer": [
+          "rescue",
+          "elastic",
+          "stride"
+        ]
+      },
+      {
+        "wave": 4,
+        "offer": [
+          "stride",
+          "power",
+          "quick"
+        ]
+      },
+      {
+        "wave": 5,
+        "offer": [
+          "elastic",
+          "power",
+          "edge"
+        ]
+      }
+    ],
+    "kinds": [
+      "hunter",
+      "shield",
+      "runner",
+      "leaker",
+      "splitter",
+      "tank",
+      "boss"
+    ],
+    "profile": {
+      "kills": 55,
+      "bestWave": 6,
+      "rescues": 0,
+      "wins": 1
+    },
+    "levels": {
+      "power": 0,
+      "elastic": 1,
+      "repair": 0,
+      "quick": 0,
+      "edge": 0,
+      "stride": 1,
+      "rescue": 1
+    },
+    "elapsed": 86400
+  }
+}

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050910" />
+    <meta
+      name="description"
+      content="Volt-Mates. Dos pilotos, un vínculo eléctrico. Juego cooperativo local y online de supervivencia."
+    />
+    <title>Volt-Mates — El vínculo es el arma</title>
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+    <script defer src="assets.js"></script>
+    <script defer src="ranking-config.js"></script>
+    <script defer src="ranking.js"></script>
+    <script defer src="expedition.js"></script>
+    <script defer src="game.js"></script>
+  </head>
+  <body data-screen="boot">
+    <!-- Toda la ventana es el juego. La arena lógica sigue siendo 800×600. -->
+    <main id="viewport" class="game-viewport" aria-label="Volt-Mates">
+      <div id="game"></div>
+      <div class="screen-grain" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <nav id="system-controls" class="system-controls" aria-label="Controles del juego" hidden>
+        <button id="sound-button" class="icon-button" aria-label="Silenciar sonido" title="Sonido">
+          ♪
+        </button>
+        <button id="help-button" class="icon-button" aria-label="Ver tutorial" title="Tutorial">
+          ?
+        </button>
+        <button
+          id="fullscreen-button"
+          class="icon-button"
+          aria-label="Entrar en pantalla completa"
+          title="Pantalla completa"
+        >
+          ⛶
+        </button>
+      </nav>
+      <section id="boot-screen" class="screen boot-screen" aria-labelledby="boot-title">
+        <div class="boot-emblem" aria-hidden="true"><span></span><i></i><span></span></div>
+        <p class="eyebrow">UNA CONEXIÓN LO CAMBIA TODO</p>
+        <h1 id="boot-title" class="boot-title">VOLT<span>/</span>MATES</h1>
+        <div id="boot-loader" class="boot-loader" aria-hidden="true"><i></i></div>
+        <p id="boot-status" class="boot-status" role="status">ENCENDIENDO EL NÚCLEO…</p>
+        <button id="enter-button" class="enter-button" hidden>ENTRAR <span>↵</span></button>
+        <span class="boot-footer">DOS PILOTOS · UN VÍNCULO</span>
+      </section>
+      <section id="menu-screen" class="screen menu-screen" aria-labelledby="menu-title" hidden>
+        <div class="menu-atmosphere" aria-hidden="true">
+          <div class="horizon-grid"></div>
+          <div class="light-column light-blue"></div>
+          <div class="light-column light-pink"></div>
+          <div class="dust"></div>
+        </div>
+        <div class="menu-topline">
+          <span class="eyebrow"><i class="live-dot"></i> ESTACIÓN 07 / NÚCLEO EN LÍNEA</span
+          ><span class="build-label">LOCAL + ONLINE / V.07</span>
+        </div>
+        <div class="menu-content">
+          <div class="menu-copy">
+            <p class="overline">EL VÍNCULO ES EL ARMA</p>
+            <h1 id="menu-title" class="game-title">
+              VOLT<span>MATES<i>.</i></span>
+            </h1>
+            <p class="tagline">Separados son energía.<br />Juntos son una tormenta.</p>
+            <div class="menu-buttons">
+              <button id="start-button" class="menu-action selected">
+                <span class="menu-action-index">01</span><span>JUGAR LOCAL</span
+                ><i aria-hidden="true">↗</i>
+              </button>
+              <button id="online-button" class="menu-action">
+                <span class="menu-action-index">02</span><span>JUGAR ONLINE</span
+                ><i aria-hidden="true">→</i>
+              </button>
+              <button id="calibrate-button" class="menu-action">
+                <span class="menu-action-index">03</span><span>CALIBRACIÓN</span
+                ><i aria-hidden="true">→</i>
+              </button>
+              <button id="tutorial-button" class="menu-action">
+                <span class="menu-action-index">04</span><span>CÓMO JUGAR</span
+                ><i aria-hidden="true">→</i>
+              </button>
+              <button id="settings-button" class="menu-action">
+                <span class="menu-action-index">05</span><span>AJUSTES</span
+                ><i aria-hidden="true">→</i>
+              </button>
+              <button id="workshop-button" class="menu-action">
+                <span class="menu-action-index">06</span><span>TALLER DE PILOTOS</span
+                ><i aria-hidden="true">→</i>
+              </button>
+              <button id="ranking-button" class="menu-action">
+                <span class="menu-action-index">07</span><span>RANKING DE DÚOS</span
+                ><i aria-hidden="true">→</i>
+              </button>
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="hero-orbit orbit-outer"></div>
+            <div class="hero-orbit orbit-inner"></div>
+            <div class="hero-link"><span></span><i></i></div>
+
+            <div class="hero-unit hero-blue">
+              <svg class="pilot-portrait" viewBox="18 64 378 488">
+                <image data-atlas width="1254" height="1254" />
+              </svg>
+              <span class="unit-caption">01 <b data-name="ion">ION</b></span>
+            </div>
+            <div class="hero-unit hero-pink">
+              <svg class="pilot-portrait" viewBox="427 64 379 488">
+                <image data-atlas width="1254" height="1254" />
+              </svg>
+              <span class="unit-caption">02 <b data-name="flux">FLUX</b></span>
+            </div>
+            <div class="hero-readout">
+              <span>∞</span>
+              <p>EL PODER ESTÁ<br />ENTRE USTEDES.</p>
+            </div>
+            <span class="art-cross cross-a">+</span><span class="art-cross cross-b">+</span>
+          </div>
+        </div>
+        <div class="menu-footer">
+          <span class="keyboard-note"><kbd>↑</kbd><kbd>↓</kbd> ELEGIR <kbd>↵</kbd> CONECTAR</span
+          ><span>PILOTOS CONECTADOS <i>/</i> V.07</span
+          ><span id="menu-best" class="menu-footer-motto">RÉCORD 0</span>
+        </div>
+      </section>
+      <section
+        id="deploy-screen"
+        class="screen deploy-screen"
+        aria-labelledby="deploy-title"
+        hidden
+      >
+        <div class="deploy-crosshair" aria-hidden="true"></div>
+        <p class="eyebrow">ESTACIÓN 07 / SECUENCIA DE ENLACE</p>
+        <h2 id="deploy-title">Sincronizando pilotos.</h2>
+        <span id="deploy-count" class="deploy-count">3</span>
+        <div class="pilot-ready">
+          <span><i class="blue-square"></i> <b data-name="ion">ION</b> / WASD</span><b>ϟ</b
+          ><span><i class="pink-square"></i> <b data-name="flux">FLUX</b> / FLECHAS</span>
+        </div>
+        <p id="deploy-tip" class="deploy-tip">El rayo es su arma. La distancia es su riesgo.</p>
+      </section>
+      <div id="hud" class="hud" hidden>
+        <div class="hud-topbar">
+          <div class="mission-hud">
+            <span class="eyebrow">ESTACIÓN 07</span><strong id="mission-title">CALIBRACIÓN</strong
+            ><span id="target-count">DRONES 0 / 3</span>
+          </div>
+          <div id="score-hud" class="score-hud" hidden>
+            <span>PUNTUACIÓN</span><strong id="score-value">0</strong
+            ><small id="combo-value">EL VÍNCULO ES EL ARMA</small>
+          </div>
+          <div id="link-hud" class="link-hud" data-link="stable">
+            <div class="link-heading">
+              <span id="link-status">ENLACE ESTABLE</span><span id="link-distance">0 / 300</span>
+            </div>
+            <div
+              class="tension-track"
+              role="progressbar"
+              aria-label="Distancia del vínculo"
+              aria-valuemin="0"
+              aria-valuemax="300"
+              aria-valuenow="0"
+            >
+              <i id="tension-fill"></i><b></b>
+            </div>
+            <span id="link-instruction" class="link-instruction"
+              >Mantengan el vínculo dentro del límite.</span
+            >
+          </div>
+          <div class="session-hud">
+            <span id="session-time">00:00</span
+            ><button id="pause-button" class="icon-button" aria-label="Pausar">Ⅱ</button>
+          </div>
+        </div>
+        <div id="wave-banner" class="wave-banner" hidden>
+          <strong id="wave-label">OLEADA 01</strong
+          ><span id="wave-detail">RASTREADORES ENTRANTES</span>
+        </div>
+        <div id="break-alert" class="break-alert" hidden>
+          <span id="break-title">VÍNCULO ROTO</span><strong id="stun-count">2.0</strong>
+          <p id="break-description">Sobrecarga. Pilotos aturdidos.</p>
+        </div>
+        <div class="encounter-console">
+          <div id="boss-status" class="boss-status" hidden>
+            <strong id="boss-label">EL DESCONECTOR</strong>
+            <div class="health-track"><i id="boss-fill"></i></div>
+          </div>
+          <div id="event-status" class="event-status" role="status" hidden></div>
+          <div id="rescue-status" class="rescue-status" role="status" hidden>
+            <strong id="rescue-label"></strong>
+            <div class="health-track"><i id="rescue-fill"></i></div>
+            <small>Acércate y permanece junto a la chispa.</small>
+          </div>
+        </div>
+        <div id="unlock-toast" class="unlock-toast" role="status" hidden></div>
+        <div class="vital-console">
+          <span id="connection-info" class="connection-info">DOS PILOTOS · UN VÍNCULO</span>
+          <div id="vitals" class="vitals" hidden>
+            <div id="ion-vital" class="vital-card ion-vital">
+              <div><strong data-name="ion">ION</strong><span id="ion-health">100 / 100</span></div>
+              <div
+                id="ion-bar"
+                class="health-track"
+                role="progressbar"
+                aria-label="Energía de Ion"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="100"
+              >
+                <i id="ion-health-fill"></i>
+              </div>
+            </div>
+            <div id="flux-vital" class="vital-card flux-vital">
+              <div>
+                <strong data-name="flux">FLUX</strong><span id="flux-health">100 / 100</span>
+              </div>
+              <div
+                id="flux-bar"
+                class="health-track"
+                role="progressbar"
+                aria-label="Energía de Flux"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="100"
+              >
+                <i id="flux-health-fill"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="game-bottom">
+          <span><i class="blue-square"></i> <b data-name="ion">ION</b> <kbd>WASD</kbd></span
+          ><span id="mission-instruction">Atraviesen los drones con el rayo.</span
+          ><span
+            ><i class="pink-square"></i> <b data-name="flux">FLUX</b>
+            <kbd id="flux-keys">↑←↓→</kbd></span
+          >
+        </div>
+        <button id="targets-button" class="rearm-button"><kbd>T</kbd> REARMAR DRONES</button>
+      </div>
+      <section
+        id="tutorial-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tutorial-title"
+        hidden
+      >
+        <div class="modal-card tutorial-card">
+          <div class="modal-topline">
+            <span class="eyebrow">MANUAL DE ENLACE</span
+            ><button class="close-button" data-close="tutorial" aria-label="Cerrar tutorial">
+              ×
+            </button>
+          </div>
+          <div class="step-indicator">
+            <i class="step-dot active"></i><i class="step-dot"></i><i class="step-dot"></i
+            ><i class="step-dot"></i><span id="step-number">01 / 04</span>
+          </div>
+          <h2 id="tutorial-title">Dos pilotos. Un teclado.</h2>
+          <p id="tutorial-description" class="modal-description"></p>
+          <div id="tutorial-controls" class="tutorial-controls">
+            <div class="control-card blue-control">
+              <svg class="tutorial-pilot" viewBox="18 64 378 488" aria-hidden="true">
+                <image data-atlas width="1254" height="1254" /></svg
+              ><strong><b data-name="ion">Ion</b> / PILOTO 01</strong>
+              <div class="key-layout">
+                <kbd>W</kbd>
+                <div><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div>
+              </div>
+            </div>
+            <div class="control-card pink-control">
+              <svg class="tutorial-pilot" viewBox="427 64 379 488" aria-hidden="true">
+                <image data-atlas width="1254" height="1254" /></svg
+              ><strong><b data-name="flux">Flux</b> / PILOTO 02</strong>
+              <div class="key-layout">
+                <kbd>↑</kbd>
+                <div><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></div>
+              </div>
+            </div>
+          </div>
+          <div id="tutorial-link" class="tutorial-diagram" hidden>
+            <span class="diagram-player diagram-blue"></span><span class="diagram-beam"></span
+            ><span class="diagram-target">✦</span><span class="diagram-player diagram-pink"></span>
+            <p>EL SEGMENTO ES SU ARMA</p>
+          </div>
+          <div id="tutorial-tension" class="tutorial-tension" hidden>
+            <span>300 PX</span>
+            <div class="demo-tension"><i></i></div>
+            <strong>1 s DE SOBRECARGA → 2 s DE ATURDIMIENTO</strong>
+            <p>Acérquense a 270 px para reconectar.</p>
+          </div>
+          <div id="tutorial-tips" class="tutorial-tips" hidden>
+            <p><kbd>Esc</kbd> Pausar o continuar</p>
+            <p><kbd>T</kbd> Rearmar drones en calibración</p>
+            <p><kbd>R</kbd> Reiniciar desde la pausa</p>
+          </div>
+          <div class="modal-navigation">
+            <button id="tutorial-back" class="button button-secondary" disabled>← Anterior</button
+            ><button id="tutorial-next" class="button button-primary">Siguiente →</button>
+          </div>
+        </div>
+      </section>
+      <section
+        id="pause-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pause-title"
+        hidden
+      >
+        <div class="modal-card pause-card">
+          <span class="eyebrow">SEÑAL EN SUSPENSIÓN</span
+          ><span class="pause-symbol" aria-hidden="true">Ⅱ</span>
+          <h2 id="pause-title">Un respiro.</h2>
+          <p class="modal-description">La estación puede esperar.</p>
+          <div id="run-build" class="run-build" hidden></div>
+          <div class="vertical-buttons">
+            <button id="resume-button" class="button button-primary">Continuar conexión →</button
+            ><button id="restart-button" class="button button-secondary">Reiniciar prueba</button
+            ><button id="pause-tutorial-button" class="text-button">Ver controles</button
+            ><button id="pause-workshop-button" class="text-button">Taller de pilotos</button
+            ><button id="pause-settings-button" class="text-button">Ajustes</button
+            ><button id="home-button" class="text-button">Volver al inicio</button>
+          </div>
+          <span id="pause-note" class="pause-footnote">ESC PARA CONTINUAR</span>
+        </div>
+      </section>
+      <section
+        id="settings-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+        hidden
+      >
+        <div class="modal-card settings-card">
+          <div class="modal-topline">
+            <span class="eyebrow">PREFERENCIAS DEL NÚCLEO</span
+            ><button class="close-button" data-close="settings" aria-label="Cerrar ajustes">
+              ×
+            </button>
+          </div>
+          <h2 id="settings-title">A tu frecuencia.</h2>
+          <p class="modal-description">Tus preferencias se guardan en este navegador.</p>
+          <button id="audio-setting" class="setting-row">
+            <span>Sonido<small>Efectos y banda sonora</small></span
+            ><strong id="audio-value">ACTIVOS</strong></button
+          ><button id="music-setting" class="setting-row">
+            <span>Música<small>Circuit Heart · mezcla original</small></span
+            ><strong id="music-value">ACTIVA</strong></button
+          ><button id="motion-setting" class="setting-row">
+            <span>Movimiento visual<small>Partículas, cámara y animaciones</small></span
+            ><strong id="motion-value">COMPLETO</strong></button
+          ><button id="settings-close" class="button button-primary">Listo →</button>
+        </div>
+      </section>
+      <section id="error-screen" class="screen boot-screen" role="alert" hidden>
+        <span class="eyebrow">SEÑAL PERDIDA</span>
+        <h2>No llegó la chispa.</h2>
+        <p id="error-message" class="modal-description">
+          No se pudo cargar Phaser. Comprueba tu conexión a internet.
+        </p>
+        <button id="reload-button" class="button button-primary">Reintentar ↗</button>
+      </section>
+
+      <section
+        id="gameover-screen"
+        class="screen modal-screen gameover-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="result-title"
+        hidden
+      >
+        <div class="modal-card result-card">
+          <span class="eyebrow">ESTACIÓN 07 / FIN DE TRANSMISIÓN</span
+          ><span class="result-emblem" aria-hidden="true">ϟ</span>
+          <h2 id="result-title">La chispa no se apaga.</h2>
+          <p id="result-reason" class="result-reason">CONEXIÓN PERDIDA</p>
+          <span class="result-score-label">PUNTUACIÓN FINAL</span
+          ><strong id="result-score" class="result-score">0</strong
+          ><span id="result-record" class="result-record">RÉCORD 0</span>
+          <div class="result-stats">
+            <div><strong id="result-waves">0</strong><span>OLEADAS SUPERADAS</span></div>
+            <div><strong id="result-kills">0</strong><span>ENEMIGOS CORTADOS</span></div>
+            <div><strong id="result-time">00:00</strong><span>TIEMPO CONECTADOS</span></div>
+          </div>
+          <p class="result-tip">Otra chispa. Otro intento. Juntos.</p>
+          <p id="result-league-status" class="result-league-status" role="status"></p>
+          <button id="result-ranking-button" class="text-button">VER RANKING DEL DÚO →</button>
+          <div class="result-actions">
+            <button id="retry-button" class="button button-primary">VOLVER A CONECTAR ↗</button
+            ><button id="result-home-button" class="button button-secondary">MENÚ PRINCIPAL</button>
+          </div>
+          <span class="pause-footnote">R PARA REINTENTAR · ESC PARA VOLVER</span>
+        </div>
+      </section>
+
+      <section
+        id="lobby-screen"
+        class="screen modal-screen lobby-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lobby-title"
+        hidden
+      >
+        <div class="modal-card lobby-card">
+          <span class="eyebrow">COOPERATIVO ONLINE</span>
+          <h2 id="lobby-title">Encuentra tu otra mitad.</h2>
+          <span class="lobby-duo" data-duo-name></span>
+          <p class="modal-description">
+            Ion crea la sala. Flux se une con el código.<br />Cada piloto juega desde su equipo con
+            WASD.
+          </p>
+          <div id="room-controls" class="room-controls">
+            <button id="create-room" class="button button-primary">
+              CREAR SALA <span>↗</span></button
+            ><span class="room-divider">O ÚNETE A TU COMPAÑERO</span
+            ><label for="room-input">CÓDIGO DE SALA</label>
+            <div class="room-join">
+              <input
+                id="room-input"
+                type="text"
+                maxlength="8"
+                placeholder="ABCDEFGH"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-describedby="lobby-status"
+              /><button id="join-room" class="button button-secondary">CONECTAR →</button>
+            </div>
+          </div>
+          <div id="room-details" class="room-details" hidden>
+            <span class="room-label">SU CÓDIGO DE ENLACE</span>
+            <div class="room-code-row">
+              <strong id="room-code">--------</strong
+              ><button id="copy-room" class="button button-secondary">COPIAR</button>
+            </div>
+            <input
+              id="room-copy-fallback"
+              class="room-copy-fallback"
+              readonly
+              aria-label="Código para copiar"
+              hidden
+            />
+            <div class="lobby-pilots">
+              <div id="ion-seat" class="lobby-seat">
+                <i class="blue-square"></i><strong>ION</strong><span id="ion-role">ANFITRIÓN</span>
+              </div>
+              <b>ϟ</b>
+              <div id="flux-seat" class="lobby-seat">
+                <i class="pink-square"></i><strong>FLUX</strong
+                ><span id="flux-role">ESPERANDO</span>
+              </div>
+            </div>
+            <button id="room-start" class="button button-primary" disabled>
+              INICIAR PARTIDA ↗
+            </button>
+            <p id="guest-wait" class="guest-wait" hidden>
+              El anfitrión iniciará la partida cuando estén conectados.
+            </p>
+          </div>
+          <p id="lobby-status" class="lobby-status" role="status">
+            Crea una sala o introduce el código de tu compañero.
+          </p>
+          <button id="lobby-identity-button" class="text-button">NOMBRES DEL DÚO</button
+          ><button id="lobby-workshop-button" class="text-button">PERSONALIZAR MI PILOTO</button
+          ><button id="lobby-back" class="text-button">← VOLVER AL MENÚ</button>
+        </div>
+      </section>
+      <section
+        id="disconnected-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="disconnect-title"
+        hidden
+      >
+        <div class="modal-card disconnect-card">
+          <span class="eyebrow">SEÑAL INTERRUMPIDA</span>
+          <h2 id="disconnect-title">El vínculo está en pausa.</h2>
+          <p id="disconnect-message" class="modal-description">
+            Tu compañero se desconectó. La partida está detenida.
+          </p>
+          <button id="disconnect-home" class="button button-primary">VOLVER AL MENÚ →</button>
+        </div>
+      </section>
+
+      <section
+        id="upgrade-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upgrade-title"
+        hidden
+      >
+        <div class="modal-card upgrade-card">
+          <span class="eyebrow">ENERGÍA RECUPERADA</span>
+          <h2 id="upgrade-title">¿Qué chispa sigue?</h2>
+          <p id="upgrade-note" class="modal-description">Elijan una mejora compartida.</p>
+          <div id="upgrade-options" class="upgrade-options"></div>
+          <span class="pause-footnote">1 · 2 · 3 PARA ELEGIR</span>
+        </div>
+      </section>
+      <section
+        id="workshop-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="workshop-title"
+        hidden
+      >
+        <div class="modal-card workshop-card">
+          <div class="modal-topline">
+            <span class="eyebrow">TALLER DE NÚCLEOS</span
+            ><button id="workshop-close" class="close-button" aria-label="Cerrar taller">×</button>
+          </div>
+          <h2 id="workshop-title">Tu propia chispa.</h2>
+          <div class="workshop-layout">
+            <div class="workshop-display">
+              <div class="pilot-selector">
+                <button data-pilot="0" aria-pressed="true">ION</button
+                ><button data-pilot="1" aria-pressed="false">FLUX</button>
+              </div>
+              <div id="workshop-avatar" class="workshop-avatar" data-accessory="none">
+                <svg id="workshop-preview" viewBox="18 64 378 488" aria-hidden="true">
+                  <image data-atlas width="1254" height="1254" />
+                </svg>
+                <i class="preview-accessory"></i
+                ><span id="workshop-beam" class="workshop-beam"></span>
+              </div>
+              <strong id="workshop-pilot-name">ION</strong
+              ><span id="workshop-summary" class="workshop-summary"></span>
+            </div>
+            <div class="workshop-inventory">
+              <div class="custom-tabs" role="group" aria-label="Tipo de cosmético">
+                <button data-custom-tab="paint" aria-pressed="true">Color</button
+                ><button data-custom-tab="accessory" aria-pressed="false">Accesorio</button
+                ><button data-custom-tab="beam" aria-pressed="false">Vínculo</button>
+              </div>
+              <div id="cosmetic-list" class="cosmetic-list"></div>
+            </div>
+          </div>
+          <button id="workshop-identity-button" class="text-button">
+            CAMBIAR NOMBRES DEL DÚO →
+          </button>
+          <p class="workshop-note">
+            Gana diseños jugando. Tu colección se guarda en este navegador.
+          </p>
+          <button id="workshop-done" class="button button-primary">Listo →</button>
+        </div>
+      </section>
+
+      <section
+        id="ranking-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ranking-title"
+        hidden
+      >
+        <div class="modal-card ranking-card">
+          <div class="modal-topline">
+            <span class="eyebrow">LAS MEJORES CHISPAS</span
+            ><button id="ranking-close" class="close-button" aria-label="Cerrar ranking">×</button>
+          </div>
+          <h2 id="ranking-title">Dúos que dejan huella.</h2>
+          <div class="ranking-toolbar">
+            <div class="custom-tabs" role="group" aria-label="Clasificación">
+              <button data-league-scope="local" aria-pressed="true">Este dispositivo</button
+              ><button data-league-scope="global" aria-pressed="false">Global</button>
+            </div>
+            <button id="ranking-refresh" class="icon-button" aria-label="Actualizar ranking">
+              ↻
+            </button>
+          </div>
+          <p id="ranking-status" class="ranking-status" role="status"></p>
+          <ol id="ranking-list" class="ranking-list" aria-label="Clasificación de dúos"></ol>
+          <p id="ranking-empty" class="ranking-empty"></p>
+          <div class="ranking-footer">
+            <button id="ranking-identity-button" class="text-button">NOMBRAR MI DÚO →</button
+            ><small>Puntos · Oleadas · Menor tiempo</small>
+          </div>
+        </div>
+      </section>
+      <section
+        id="identity-screen"
+        class="screen modal-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="identity-title"
+        hidden
+      >
+        <div class="modal-card identity-card">
+          <div class="modal-topline">
+            <span class="eyebrow">SU FIRMA EN EL NÚCLEO</span
+            ><button id="identity-close" class="close-button" aria-label="Cerrar nombres">×</button>
+          </div>
+          <h2 id="identity-title">¿Cómo se llama su chispa?</h2>
+          <form id="identity-form">
+            <label for="duo-name-input">NOMBRE DEL DÚO</label
+            ><input
+              id="duo-name-input"
+              type="text"
+              maxlength="24"
+              required
+              autocomplete="off"
+              placeholder="Los Cortocircuitos"
+            />
+            <div class="identity-pilots">
+              <div>
+                <label for="ion-name-input"><i class="blue-square"></i> PILOTO AZUL</label
+                ><input
+                  id="ion-name-input"
+                  type="text"
+                  maxlength="16"
+                  required
+                  autocomplete="off"
+                  placeholder="Ion"
+                />
+              </div>
+              <div>
+                <label for="flux-name-input"><i class="pink-square"></i> PILOTO ROSA</label
+                ><input
+                  id="flux-name-input"
+                  type="text"
+                  maxlength="16"
+                  required
+                  autocomplete="off"
+                  placeholder="Flux"
+                />
+              </div>
+            </div>
+            <p id="identity-note" class="identity-note"></p>
+            <p id="identity-error" class="identity-error" role="alert"></p>
+            <button type="submit" class="button button-primary">GUARDAR NOMBRES →</button>
+          </form>
+        </div>
+      </section>
+      <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+      <noscript
+        ><div class="noscript-note">Activa JavaScript para encender Volt-Mates.</div></noscript
+      >
+    </main>
+  </body>
+</html>

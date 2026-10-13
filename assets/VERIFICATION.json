@@ -1,0 +1,37 @@
+{
+  "phase": 5,
+  "visual": {
+    "atlasFrames": 6,
+    "transparentPixelsPercent": 63.57,
+    "desktopBoardBefore": [
+      861.33,
+      646
+    ],
+    "desktopBoardAfter": [
+      928,
+      696
+    ],
+    "buffer": [
+      1856,
+      1392
+    ],
+    "logicalWorld": [
+      800,
+      600
+    ],
+    "healthFontPixels": 17,
+    "healthBarPixels": 12
+  },
+  "checks": [
+    "Carga HTTP y file://",
+    "Atlas y música decodificados",
+    "Silencio musical y recuperación",
+    "Diseño móvil y horizontal sin scroll",
+    "Controles locales y tres tipos de enemigos",
+    "Sprites completos dentro de los bordes",
+    "Movimiento reducido",
+    "13 comprobaciones PeerJS/WebRTC real, pausa y desconexión"
+  ],
+  "audio": "Composición original sintetizada; no generada con una herramienta de audio IA.",
+  "art": "ImageGen integrado; prompts en assets/PROVENANCE.md"
+}
