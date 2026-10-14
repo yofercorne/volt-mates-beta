@@ -28,8 +28,9 @@ y la disponibilidad de un servidor TURN; cambiar únicamente el alojamiento est�
 
 Para compartir un diagnóstico, copia el registro del juego y la URL/estado de la petición fallida.
 No hace falta compartir contraseñas ni claves secretas de Supabase.
-La integración de Metered / Open Relay se activa en network-config.js. Sigue [ONLINE.md](ONLINE.md)
-para obtener la clave de una credencial TURN y comprobar el relay. Todavía falta configurar esa cuenta.
+La API Key de Metered se guarda únicamente en las variables privadas de Vercel.
+La función api/turn.js entrega los servidores ICE al navegador. Sigue [ONLINE.md](ONLINE.md)
+para configurar METERED_DOMAIN y METERED_TURN_API_KEY y comprobar el relay.
 
 ## Controles
 

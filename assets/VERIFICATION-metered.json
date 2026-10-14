@@ -1,0 +1,47 @@
+{
+  "url": "http://127.0.0.1:4173/",
+  "checks": [
+    "TURN real por TCP mediante /api/turn privado, sin conexión directa ni acceso UDP al relay",
+    "Ambos entran en la partida",
+    "Los controles del invitado llegan al anfitrión a través de TURN",
+    "El invitado comunica la pausa al anfitrión"
+  ],
+  "transport": {
+    "host": "0.peerjs.com",
+    "port": 443,
+    "secure": true,
+    "channel": "open"
+  },
+  "relayStats": [
+    {
+      "policy": "relay",
+      "connectionState": "connected",
+      "localType": "relay",
+      "remoteType": "relay",
+      "relayProtocol": "tcp",
+      "protocol": "udp",
+      "state": "in-progress"
+    },
+    {
+      "policy": "relay",
+      "connectionState": "connected",
+      "localType": "relay",
+      "remoteType": "relay",
+      "relayProtocol": "tcp",
+      "protocol": "udp",
+      "state": "succeeded"
+    }
+  ],
+  "ranking": "Dúos de todos los jugadores · Mejor partida de cada equipo.",
+  "errors": [],
+  "failed": [],
+  "responses": [],
+  "credentialStorage": "Sólo variables privadas METERED_DOMAIN y METERED_TURN_API_KEY del servidor",
+  "testPolicy": "relay",
+  "productionPolicy": "all",
+  "unitTests": 11,
+  "limitations": [
+    "Prueba local con función privada y dos sesiones en la misma red; pendiente configuración y comprobación de variables de Vercel",
+    "No se enviaron puntuaciones nuevas a Supabase"
+  ]
+}

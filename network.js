@@ -34,15 +34,10 @@
 
   async function prepare(signal) {
     const settings = window.VOLT_NETWORK_CONFIG || {};
-    const domain = (settings.meteredDomain || "").trim().toLowerCase();
-    const key = settings.meteredCredentialApiKey || "";
-    if (!domain && !key) return { config: null, relayConfigured: false, tlsRelay: false };
-    if (
-      !/^[a-z\d](?:[a-z\d-]*[a-z\d])?\.metered\.live$/.test(domain) ||
-      typeof key !== "string" ||
-      !key.trim() ||
-      key.length > 1024
-    )
+    const endpoint = settings.turnCredentialsUrl || "";
+    if (!endpoint || location.protocol === "file:")
+      return { config: null, relayConfigured: false, tlsRelay: false };
+    if (typeof endpoint !== "string" || !/^\/(?!\/)[a-z\d/_-]+$/i.test(endpoint))
       throw Error("turn-invalid-config");
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     const controller = new AbortController();
@@ -50,12 +45,16 @@
     signal?.addEventListener("abort", cancel, { once: true });
     const timeout = setTimeout(cancel, 10000);
     try {
-      const response = await fetch(
-        `https://${domain}/api/v1/turn/credentials?apiKey=${encodeURIComponent(key)}`,
-        { signal: controller.signal, cache: "no-store", referrerPolicy: "no-referrer" },
-      );
+      const response = await fetch(endpoint, {
+        signal: controller.signal,
+        cache: "no-store",
+        credentials: "same-origin",
+      });
+      const data = await response.json();
+      if (response.status === 503 && data?.error === "turn-not-configured")
+        return { config: null, relayConfigured: false, tlsRelay: false };
       if (!response.ok) throw Error("turn-credentials-unavailable");
-      const iceServers = normalizeServers(await response.json());
+      const iceServers = normalizeServers(data.iceServers);
       return {
         config: {
           iceServers,

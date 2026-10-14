@@ -19,6 +19,7 @@ const servers = [
 function load(config, fetch) {
   const context = {
     window: { VOLT_NETWORK_CONFIG: config },
+    location: { protocol: "https:" },
     fetch,
     AbortController,
     DOMException,
@@ -29,8 +30,7 @@ function load(config, fetch) {
   return context.window.VoltNetwork;
 }
 const config = {
-  meteredDomain: "volt-test.metered.live",
-  meteredCredentialApiKey: "scoped-test-key",
+  turnCredentialsUrl: "/api/turn",
 };
 
 test("sin cuenta configurada conserva la configuración predeterminada de PeerJS", async () => {
@@ -42,15 +42,12 @@ test("sin cuenta configurada conserva la configuración predeterminada de PeerJS
   assert.equal(result.relayConfigured, false);
 });
 
-test("usa la API de una credencial y entrega las rutas TCP/TLS a PeerJS", async () => {
+test("consulta sólo la función del mismo origen y entrega TCP/TLS a PeerJS", async () => {
   const api = load({ ...config, iceTransportPolicy: "relay" }, async (url, options) => {
-    assert.equal(
-      url,
-      "https://volt-test.metered.live/api/v1/turn/credentials?apiKey=scoped-test-key",
-    );
-    assert.equal(options.referrerPolicy, "no-referrer");
+    assert.equal(url, "/api/turn");
+    assert.equal(options.credentials, "same-origin");
     assert.equal(options.cache, "no-store");
-    return { ok: true, json: async () => servers };
+    return { ok: true, json: async () => ({ iceServers: servers }) };
   });
   const result = await api.prepare();
   assert.equal(result.config.iceTransportPolicy, "relay");
@@ -62,8 +59,21 @@ test("usa la API de una credencial y entrega las rutas TCP/TLS a PeerJS", async 
 });
 
 test("rechazo del proveedor no filtra su respuesta ni la clave en el error", async () => {
-  const api = load(config, async () => ({ ok: false, status: 401 }));
+  const api = load(config, async () => ({
+    ok: false,
+    status: 502,
+    json: async () => ({ error: "turn-provider-unavailable" }),
+  }));
   await assert.rejects(api.prepare(), { message: "turn-credentials-unavailable" });
+});
+
+test("antes de configurar Vercel conserva PeerJS sin romper las salas existentes", async () => {
+  const api = load(config, async () => ({
+    ok: false,
+    status: 503,
+    json: async () => ({ error: "turn-not-configured" }),
+  }));
+  assert.equal((await api.prepare()).config, null);
 });
 
 test("cancelar el lobby aborta la petición de credenciales pendiente", async () => {

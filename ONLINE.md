@@ -1,62 +1,52 @@
-# Conectar Volt-Mates entre redes distintas
+# TURN privado para Volt-Mates
 
-El ranking usa Supabase. PeerJS Cloud localiza los pilotos; WebRTC transporta la partida.
-`signalingOpened: true` confirma que respondió el servicio de salas, pero no confirma un enlace
-entre los jugadores. Un `setup-timeout` puede ser una negociación ICE incompleta o un saludo
-del juego sin confirmar. El diagnóstico incluye los estados de ICE, SDP y del canal para distinguirlos.
-Los datos móviles pueden utilizar NAT compartido o simétrico: también pueden necesitar TURN.
+PeerJS Cloud localiza las salas y WebRTC transporta la partida. La función de Vercel en
+`api/turn.js` consulta Metered usando variables privadas. El cliente sólo solicita
+`/api/turn`: la API Key no está en JavaScript público, GitHub ni en la respuesta de la función.
+El navegador recibe las URLs, usuario y contraseña TURN que WebRTC necesita para conectar;
+los datos de la partida siguen viajando cifrados entre los pilotos.
 
-## Activar Metered / Open Relay
+## Configurar Vercel
 
-1. Crea una cuenta en https://dashboard.metered.ca/signup y selecciona el servicio TURN / Open Relay.
-2. Obtén el dominio de tu aplicación, por ejemplo `volt-mates.metered.live`.
-3. En TURN Server, crea una credencial para esta beta. En su fila abre **Get credential / Show API Key**.
-   Usa esa **Credential API Key**, limitada a obtener los servidores de esa credencial.
-   No uses la **Secret Key** de Developers ni una clave de administración del proyecto.
-4. Completa `network-config.js`:
+En el proyecto, abre **Settings → Environment Variables** y añade para **Production**:
+
+- `METERED_DOMAIN`: `voltmates.metered.live`.
+- `METERED_TURN_API_KEY`: la Credential API Key de tu credencial TURN. Guarda esta variable
+  como **Sensitive** si el panel ofrece esa opción. No uses un prefijo público ni copies el valor a GitHub.
+
+Guarda y vuelve a desplegar. Las variables nuevas se aplican a un nuevo despliegue.
+Para las versiones Preview, añade las variables en ese entorno si quieres probarlas allí.
+
+La configuración pública en `network-config.js` contiene sólo:
 
 ```js
 window.VOLT_NETWORK_CONFIG = Object.freeze({
-  meteredDomain: "TU-APP.metered.live",
-  meteredCredentialApiKey: "API_KEY_DE_LA_CREDENCIAL_TURN",
+  turnCredentialsUrl: "/api/turn",
   iceTransportPolicy: "all",
 });
 ```
 
-5. Guarda el archivo en GitHub y espera al despliegue de Vercel. Ambos jugadores deben recargar.
-6. El cliente solicita `GET /api/v1/turn/credentials` antes de crear PeerJS y valida el resultado.
-   El navegador elige la ruta directa o TURN. Si caducas o deshabilitas la credencial, actualiza la
-   configuración para las nuevas salas. La clave es pública y consume la cuota de esa credencial;
-   revisa su uso en el panel de Metered durante la beta.
+Si faltan variables, la función responde `503 / turn-not-configured` y el juego conserva
+los servidores predeterminados de PeerJS para permitir conexiones que ya funcionaban.
+Un error del proveedor responde `502` sin revelar su URL interna ni la clave.
+La función rechaza orígenes ajenos y limita solicitudes por IP dentro de cada instancia.
+Este límite de beta no es un sistema distribuido de autenticación o protección de cuota.
 
-No hay que cambiar la base de datos ni desplegar otro servidor del juego.
-Sin estos valores se conservan los servidores predeterminados de PeerJS; la integración nueva
-está preparada, pero el relay de tu cuenta no queda activo hasta configurar la credencial.
+## Probar
 
-## Comprobar el relay
+Abre la URL de Vercel en ambos equipos, recarga y crea una sala nueva. Prueba con dos redes
+distintas, incluyendo datos móviles. Para comprobar TURN exclusivamente, usa temporalmente
+`iceTransportPolicy: "relay"`; después vuelve a `"all"` para permitir rutas directas.
 
-Para una prueba corta, cambia `iceTransportPolicy` a `"relay"` con Metered configurado y despliega.
-Ambos jugadores deben poder crear/unirse e iniciar la partida usando únicamente TURN.
-Después devuelve el valor a `"all"` para permitir conexiones directas con menor latencia.
-Prueba también dos redes diferentes, una de ellas con datos móviles.
+Para diagnosticar, expande `[Volt-Mates] Conexión online` en ambos navegadores: los estados
+ICE, SDP y del canal permiten distinguir la negociación y el saludo de la partida.
+`relayConfigured` indica Metered; `candidateTypes` muestra si se obtuvo un candidato relay.
+La prueba local de la cuenta verificó TURN real por TCP, controles y pausa compartida.
 
-Si vuelve a fallar, expande `[Volt-Mates] Conexión online` en la consola de AMBOS navegadores.
-Comparte `connectionState`, `iceConnectionState`, `iceGatheringState`, `dataChannelState`,
-`localDescription`, `remoteDescription`, `candidateTypes`, `iceErrorCodes` y `relayConfigured`.
-El registro no incluye direcciones IP ni claves TURN. Un código ICE aislado no prueba que todos
-los servidores hayan fallado: importa el estado final y si se reunió un candidato `relay`.
-`relayConfigured` indica la configuración de Metered; `relayProvider: "peerjs-default"` indica
-los servidores de la librería, que también incluyen un relay público. No equivale a comprobar
-su disponibilidad en una red concreta ni sustituye la prueba con `iceTransportPolicy: "relay"`.
-
-## Audio
-
-Phaser no crea un segundo AudioContext. La música y los efectos utilizan el sistema propio,
-que crea y reanuda su contexto después de pulsar Entrar o interactuar con el juego.
-La política de autoplay del navegador no controla el enlace WebRTC.
+El cliente local se puede abrir con file://, pero esta función privada requiere Vercel
+o un servidor local. GitHub Pages por sí solo no ejecuta funciones Node.js.
 
 Fuentes oficiales:
-- https://peerjs.com/client/faq
-- https://www.metered.ca/tools/openrelay/
-- https://www.metered.ca/docs/turn-rest-api/
+- https://vercel.com/docs/functions/runtimes/node-js
+- https://vercel.com/docs/environment-variables
 - https://www.metered.ca/docs/turn-rest-api/get-credential/
