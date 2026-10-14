@@ -1,0 +1,67 @@
+{
+  "feature": "Normal / Andes · Circuito del Sol",
+  "visualChecks": [
+    "Selector cambia menú y retratos; todos los recortes y dimensiones coinciden",
+    "Selección persistente y atlas registrado antes de crear los pilotos",
+    "Cambiar estilo en pausa conserva posiciones, hitboxes, tamaños, vida, vínculo, tiempo, puntos y cosméticos",
+    "Movimiento y drones recién creados funcionan; taller conserva ambos pilotos",
+    "Selector y siete opciones del menú visibles en escritorio, móvil y pantalla baja"
+  ],
+  "atlasFrames": [
+    {
+      "name": "ion",
+      "equal": true
+    },
+    {
+      "name": "flux",
+      "equal": true
+    },
+    {
+      "name": "hunter",
+      "equal": true
+    },
+    {
+      "name": "runner",
+      "equal": true
+    },
+    {
+      "name": "tank",
+      "equal": true
+    },
+    {
+      "name": "cell",
+      "equal": true
+    }
+  ],
+  "onlineChecks": [
+    "Anfitrión Normal e invitado Andes conservan universos visuales independientes",
+    "Ambos pilotos usan TURN real por TCP/TLS; UDP y la ruta directa están deshabilitados",
+    "Ambos entran en la partida",
+    "Los controles del invitado llegan al anfitrión a través de TURN",
+    "El invitado comunica la pausa al anfitrión"
+  ],
+  "relayStats": [
+    {
+      "policy": "relay",
+      "connectionState": "connected",
+      "localType": "relay",
+      "remoteType": "relay",
+      "relayProtocol": "tcp",
+      "protocol": "udp",
+      "state": "succeeded"
+    },
+    {
+      "policy": "relay",
+      "connectionState": "connected",
+      "localType": "relay",
+      "remoteType": "relay",
+      "relayProtocol": "tcp",
+      "protocol": "udp",
+      "state": "succeeded"
+    }
+  ],
+  "fileOpening": "file:// Andes y calibración verificados",
+  "javascriptErrors": [],
+  "networkFailures": [],
+  "scope": "Dos sesiones en el mismo equipo; transporte TURN TCP real. No se publicaron puntuaciones."
+}

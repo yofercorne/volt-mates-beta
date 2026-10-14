@@ -3777,3 +3777,51 @@ body[data-screen="playing"] .wave-banner {
 .unit-caption b { display:inline-block; max-width:145px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; vertical-align:middle; }
 .lobby-seat strong { max-width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .game-bottom b { display:inline-block; max-width:100px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; vertical-align:middle; }
+
+/* Universos visuales: la información de juego mantiene sus colores de identidad y peligro. */
+.theme-selector {display:flex;align-items:center;gap:12px;}
+.theme-caption {font:9px var(--mono);letter-spacing:1.7px;color:#9caeb8;}
+.theme-switch {display:flex;gap:3px;padding:4px;border:1px solid #859ba54a;border-radius:30px;background:#050d18b3;}
+.theme-switch button {display:flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:6px 15px;border:0;border-radius:24px;color:#a9bac5;background:transparent;font-size:12px;transition:background .2s,color .2s,box-shadow .2s;}
+.theme-switch button[aria-pressed="true"] {background:#c7ff73;color:#101a16;box-shadow:0 2px 12px #c7ff7320;}
+.theme-switch button:hover:not([aria-pressed="true"]) {color:#fff;background:#ffffff0a;}
+.theme-switch button:focus-visible {outline-offset:2px;}
+.theme-switch button > span {font-size:16px;line-height:1;}
+.setting-theme {display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 0;border-bottom:1px solid #ffffff12;}
+.setting-theme > span {font-size:15px;}
+.setting-theme small {display:block;margin-top:5px;color:#90a6b5;font-size:11px;}
+body[data-theme="andes"] {--bg:#101723;--mint:#f2cc83;--text:#fff3de;--muted:#b4ae9f;}
+body[data-theme="andes"] .game-viewport {background:radial-gradient(ellipse at center,#354043,#101723 74%);}
+body[data-theme="andes"] .theme-switch button[aria-pressed="true"] {background:#f2cc83;box-shadow:0 2px 16px #f2cc8328;}
+body[data-theme="andes"] .menu-atmosphere::after {background:linear-gradient(90deg,#0d1522f7 6%,#1b222dcc 48%,#14233477),linear-gradient(0deg,#111a28f0,transparent 55%,#151a2790);}
+body[data-theme="andes"] .menu-atmosphere .light-column {opacity:.3;}
+body[data-theme="andes"] .hero-orbit {border-color:#e6c28330;}
+body[data-theme="andes"] .hero-readout > span {color:#f2cc83;}
+body[data-theme="andes"] .game-title i {text-shadow:0 0 35px #e7b36255;}
+body[data-theme="andes"] .menu-action.selected,body[data-theme="andes"] .menu-action:hover,body[data-theme="andes"] .menu-action:focus-visible {color:#ffe0a4;border-color:#d3b47880;background:linear-gradient(90deg,#c49a3d25,transparent);}
+body[data-theme="andes"] .menu-footer {border-top-color:#d5b57733;}
+body[data-theme="andes"] .modal-screen {background:radial-gradient(ellipse at 50% 40%,#3e3c3280,#080f1de3);}
+body[data-theme="andes"] .modal-card {border-color:#d2b07955;border-top-color:#e8c58890;background:radial-gradient(ellipse at 0 0,#67523238,transparent 55%),linear-gradient(135deg,#202c36f8,#101c2afc);}
+body[data-theme="andes"] .modal-card::before {box-shadow:0 0 14px #f2cc8355;}
+body[data-theme="andes"] #game canvas {border-color:#c3a47166;box-shadow:0 18px 80px #0008,0 0 30px #bd9b4c0c;}
+body[data-theme="andes"] .workshop-display {background:radial-gradient(ellipse at center,#82653925,transparent 72%);}
+@media (max-width:1000px) {
+ .theme-caption {display:none;}
+ .theme-selector {gap:0;}
+ .theme-switch button {padding:6px 11px;}
+}
+@media (max-width:760px) {
+ .menu-topline {padding-right:0;align-items:flex-start;flex-direction:column;gap:13px;}
+ .menu-topline .theme-selector {margin:0;}
+ .menu-topline .theme-switch button {min-height:30px;padding:5px 16px;font-size:11px;}
+ .setting-theme {flex-wrap:wrap;gap:12px;}
+}
+@media (max-height:500px) {
+ .menu-topline {flex-direction:row;align-items:center;gap:10px;padding-right:110px;}
+ .menu-topline .eyebrow {font-size:7px;letter-spacing:1px;}
+ .menu-topline .theme-switch {padding:3px;}
+ .menu-topline .theme-switch button {min-height:24px;padding:3px 10px;font-size:10px;}
+ .setting-theme {padding:12px 0;}
+}
+@media (prefers-reduced-motion:reduce) {.theme-switch button {transition:none;}}
+.reduced-motion .theme-switch button {transition:none;}

@@ -4,7 +4,7 @@ Dos pilotos unidos por un rayo. Seis oleadas, decisiones compartidas y el núcle
 
 ## Abrir el juego
 
-Abre index.html. Conserva a su lado style.css, game.js, expedition.js, assets.js, ranking.js, ranking-config.js, network.js y network-config.js. No requiere instalar nada.
+Abre index.html. Conserva a su lado style.css, game.js, expedition.js, assets.js, theme-assets.js, appearance.js, ranking.js, ranking-config.js, network.js y network-config.js. No requiere instalar nada.
 Phaser 3.90.0 y PeerJS 1.5.5 se cargan desde CDN, por lo que el primer inicio necesita internet.
 También se puede servir como sitio estático en GitHub Pages o Vercel.
 Conserva también favicon.svg y favicon.ico al publicar, para evitar solicitudes de iconos inexistentes.
@@ -54,6 +54,18 @@ Nuevos enemigos: Guardián (córtenlo por el costado del escudo), Separador (emp
 
 Si un piloto cae, su compañero tiene 8 segundos para acercarse a menos de 70 unidades y mantenerse junto a él durante 1,6 segundos. Revive con 35 de energía. Cada piloto dispone de una oportunidad por expedición. El rayo pierde capacidad de daño durante el rescate. Si ambos caen o se acaba el tiempo, termina la partida. Las mejoras pueden ampliar el rescate.
 
+## Universos visuales
+
+El selector Normal / Andes está en el inicio y en Ajustes (también desde la pausa).
+Andes · Circuito del Sol cambia el escenario, los pilotos, los drones, las ilustraciones del menú y la presentación de las ventanas.
+El arte vectorial original combina tejidos geométricos, piedra y detalles dorados en una interpretación fantástica inspirada en los Andes peruanos.
+No representa un sitio arqueológico específico ni pretende reconstruir una vestimenta histórica.
+
+La elección se guarda en este navegador y se aplica al instante. Cada participante online puede elegir su propio universo.
+Ambos atlas conservan los mismos recortes y tamaños. La apariencia no modifica hitboxes, velocidades, daño, oleadas, puntuación ni el protocolo de red.
+Los colores, accesorios y desbloqueos del taller siguen funcionando en ambos estilos.
+Los SVG originales están en assets/andes-pilots.svg y assets/andes-arena.svg; node build-themes.cjs reconstruye theme-assets.js para conservar la apertura con file://.
+
 ## Taller de pilotos
 
 Disponible en el menú, en la pausa y en el lobby. En local puedes diseñar ambos pilotos; online, sólo el tuyo.
@@ -72,6 +84,8 @@ Si el almacenamiento está bloqueado, la colección funciona en memoria durante 
 - ONLINE.md: activación del relay y diagnóstico entre redes distintas.
 - expedition.js: mejoras, eventos, rescate, progreso y taller.
 - assets.js: imágenes y música integradas como data URI para preservar file://.
+- appearance.js / theme-assets.js: selector local y recursos del universo andino.
+- build-themes.cjs: reconstruye el arte SVG andino y su paquete portable.
 - assets/: originales, frames, procedencia y validación.
 - build-assets.cjs: reconstruye assets.js con Node.js, sin dependencias.
 

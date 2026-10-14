@@ -262,7 +262,7 @@
       this.shape.body.setBoundsRectangle(new Phaser.Geom.Rectangle(10, 20, 780, 566));
       // La hitbox sigue siendo independiente del arte y del escalado HiDPI.
       this.sprite = scene.add
-        .image(x, y, "pilots", color === SETTINGS.blue ? "ion" : "flux")
+        .image(x, y, window.VoltAppearance.atlasKey, color === SETTINGS.blue ? "ion" : "flux")
         .setDisplaySize(42, 54)
         .setDepth(11);
       this.shape.setVisible(false);
@@ -543,7 +543,10 @@
       this.contact = false;
       this.hitbox = { x: x - 17, y: y - 17, width: 34, height: 34 };
       this.visual = scene.add.graphics().setDepth(9);
-      this.sprite = scene.add.image(x, y, "pilots", "hunter").setDisplaySize(44, 44).setDepth(9);
+      this.sprite = scene.add
+        .image(x, y, window.VoltAppearance.atlasKey, "hunter")
+        .setDisplaySize(44, 44)
+        .setDepth(9);
       this.label = scene.add
         .text(x, y + 36, "DRON / 0" + index, {
           resolution: 3,
@@ -787,7 +790,7 @@
         return;
       }
       const size = this.type.size + (["tank", "boss"].includes(this.kind) ? 16 : 12);
-      const frame = this.scene.textures.getFrame("pilots", this.type.frame || this.kind);
+      const frame = this.scene.textures.getFrame(this.sprite.texture.key, this.type.frame || this.kind);
       this.sprite
         .setFrame(this.type.frame || this.kind)
         .setDisplaySize(size, (size * frame.height) / frame.width);
@@ -1948,11 +1951,7 @@
       });
       this.load.image("pilots", window.VOLT_ASSETS.atlas);
       this.load.image("reactor", window.VOLT_ASSETS.arena);
-      document
-        .querySelectorAll("[data-atlas]")
-        .forEach((image) => image.setAttribute("href", window.VOLT_ASSETS.atlas));
-      document.querySelector(".menu-atmosphere").style.backgroundImage =
-        'url("' + window.VOLT_ASSETS.arena + '")';
+      window.VoltAppearance.preload(this);
     }
     create() {
       if (!this.textures.exists("pilots") || !this.textures.exists("reactor")) {
@@ -1962,6 +1961,7 @@
       Object.entries(window.VOLT_ASSETS.frames).forEach(([name, frame]) =>
         this.textures.get("pilots").add(name, 0, ...frame),
       );
+      window.VoltAppearance.register(this);
       this.activeSession = false;
       this.elapsed = 0;
       this.visualTime = 0;
@@ -2023,6 +2023,7 @@
       this.ui = new ScreenController(this);
       this.net = new OnlineSession(this);
       this.ranking = new window.VoltLeague.LeagueUI(this);
+      window.VoltAppearance.mount(this);
       this.crispRenderer = new CrispRenderer(this);
       byId("boot-loader").hidden = true;
       byId("boot-status").textContent = "NÚCLEO LISTO / ESPERANDO PILOTOS";
@@ -2048,7 +2049,7 @@
       glow.refresh();
     }
     drawArena() {
-      this.add.image(400, 300, "reactor").setDisplaySize(800, 600).setDepth(0);
+      this.arenaBackground = this.add.image(400, 300, "reactor").setDisplaySize(800, 600).setDepth(0);
       // El contraste del suelo favorece la lectura del rayo y de las siluetas.
       this.add.rectangle(400, 300, 800, 600, 0x020817, 0.13).setDepth(1);
       this.arenaTitle = this.add

@@ -15,6 +15,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
     <script defer src="assets.js"></script>
+    <script defer src="theme-assets.js"></script>
+    <script defer src="appearance.js"></script>
     <script defer src="ranking-config.js"></script>
     <script defer src="network-config.js"></script>
     <script defer src="network.js"></script>
@@ -61,8 +63,14 @@
           <div class="dust"></div>
         </div>
         <div class="menu-topline">
-          <span class="eyebrow"><i class="live-dot"></i> ESTACIÓN 07 / NÚCLEO EN LÍNEA</span
-          ><span class="build-label">LOCAL + ONLINE / V.07</span>
+          <span class="eyebrow"><i class="live-dot"></i> <span data-world-label>ESTACIÓN 07</span></span>
+          <div class="theme-selector" role="group" aria-label="Universo visual">
+            <span class="theme-caption">UNIVERSO</span>
+            <div class="theme-switch">
+              <button data-theme-choice="normal" aria-pressed="true">Normal</button>
+              <button data-theme-choice="andes" aria-pressed="false"><span aria-hidden="true">☀</span> Andes</button>
+            </div>
+          </div>
         </div>
         <div class="menu-content">
           <div class="menu-copy">
@@ -352,6 +360,13 @@
           </div>
           <h2 id="settings-title">A tu frecuencia.</h2>
           <p class="modal-description">Tus preferencias se guardan en este navegador.</p>
+          <div class="setting-theme">
+            <span>Universo visual<small>Solo cambia el arte.</small></span>
+            <div class="theme-switch" role="group" aria-label="Universo visual en ajustes">
+              <button data-theme-choice="normal" aria-pressed="true">Normal</button>
+              <button data-theme-choice="andes" aria-pressed="false"><span aria-hidden="true">☀</span> Andes</button>
+            </div>
+          </div>
           <button id="audio-setting" class="setting-row">
             <span>Sonido<small>Efectos y banda sonora</small></span
             ><strong id="audio-value">ACTIVOS</strong></button
