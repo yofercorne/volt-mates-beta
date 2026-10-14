@@ -1,0 +1,36 @@
+{
+  "checks": [
+    "Sin AudioContext antes del gesto; música propia conserva un único contexto activo",
+    "Credenciales TURN preparadas por HTTPS e inyectables en PeerJS, incluidos TCP/TLS",
+    "Modo de diagnóstico puede obligar el uso de relay",
+    "Un proveedor TURN que rechaza la clave da un error claro y permite reintentar",
+    "El tiempo de negociación se reinicia después de señalización: 45 segundos completos",
+    "Timeout ICE limpia la sesión e identifica la posible necesidad de TURN",
+    "Saludo recibido antes de abrir el canal: confirmación se envía al abrirlo y admite reintentos",
+    "Una confirmación duplicada no devuelve una partida al lobby"
+  ],
+  "unitTests": 5,
+  "realPeerJS": {
+    "url": "http://127.0.0.1:4173/",
+    "checks": [
+      "Dos navegadores independientes crean y unen una sala con PeerJS real",
+      "Ambos entran en la partida",
+      "El invitado comunica la pausa al anfitrión"
+    ],
+    "transport": {
+      "host": "0.peerjs.com",
+      "port": 443,
+      "secure": true,
+      "channel": "open"
+    },
+    "ranking": "Dúos de todos los jugadores · Mejor partida de cada equipo.",
+    "errors": [],
+    "failed": [],
+    "responses": []
+  },
+  "limitations": [
+    "Metered sin configurar: falta dominio y Credential API Key de la cuenta del usuario",
+    "API TURN verificada con respuestas controladas, no con una cuenta real",
+    "Conexión real probada entre dos sesiones independientes desde la misma red de pruebas, no la red móvil del usuario"
+  ]
+}

@@ -1047,6 +1047,12 @@
       this.timers = new Set();
       this.interval = null;
       this.setupTimer = null;
+      this.connectAbort = null;
+      this.awaitConnection = null;
+      this.reportConnection = null;
+      this.iceInfo = null;
+      this.iceCandidates = new Set();
+      this.iceErrors = new Set();
       this.code = "";
       this.lastState = "lobby";
       this.remoteOutfit = null;
@@ -1069,6 +1075,14 @@
     stop(notify = true) {
       if (notify && this.connection?.open) this.send({ t: "leave" });
       this.attempt++;
+      this.connectAbort?.abort();
+      this.connectAbort = null;
+      this.awaitConnection = null;
+      this.reportConnection = null;
+      this.setupTimer = null;
+      this.iceInfo = null;
+      this.iceCandidates.clear();
+      this.iceErrors.clear();
       this.ready = false;
       for (const id of this.timers) clearTimeout(id);
       this.timers.clear();
@@ -1136,7 +1150,7 @@
       }
       this.connect("guest", code);
     }
-    connect(role, code) {
+    async connect(role, code) {
       this.stop(false);
       if (!window.Peer) {
         this.status(
@@ -1153,6 +1167,7 @@
       this.lastSnapshot = -1;
       this.lastReceive = performance.now();
       const token = this.attempt;
+      this.connectAbort = new AbortController();
       document.body.dataset.connection = role;
       byId("create-room").disabled = true;
       byId("join-room").disabled = true;
@@ -1166,6 +1181,7 @@
       // Distinguir el acceso al servicio de salas del enlace WebRTC entre pilotos.
       const report = (type, error) => {
         const options = this.peer?.options;
+        const pc = this.connection?.peerConnection;
         console.warn("[Volt-Mates] Conexión online", {
           type,
           stage:
@@ -1179,40 +1195,68 @@
               "disconnected",
             ].includes(type)
               ? "signaling"
-              : "webrtc",
+              : this.connection?.open
+                ? "handshake"
+                : "webrtc",
           signalingOpened,
           server: options ? `${options.host}:${options.port}${options.path}` : "0.peerjs.com:443/",
           secure: options?.secure,
           online: navigator.onLine,
+          role,
+          connectionState: pc?.connectionState || "not-created",
+          iceConnectionState: pc?.iceConnectionState || "not-created",
+          iceGatheringState: pc?.iceGatheringState || "not-created",
+          dataChannelState: this.connection?.dataChannel?.readyState || "not-created",
+          localDescription: pc?.localDescription?.type || null,
+          remoteDescription: pc?.remoteDescription?.type || null,
+          candidateTypes: [...this.iceCandidates],
+          iceErrorCodes: [...this.iceErrors],
+          relayConfigured: this.iceInfo?.relayConfigured || false,
+          relayProvider: this.iceInfo?.relayConfigured ? "metered" : "peerjs-default",
+          tlsRelay: this.iceInfo?.tlsRelay || false,
           message: error?.message || "",
         });
       };
+      this.reportConnection = report;
+      const armTimeout = (ms) => {
+        this.clearSetupTimer();
+        this.setupTimer = this.schedule(() => {
+          if (token !== this.attempt || this.ready) return;
+          report("setup-timeout");
+          this.fail(
+            !signalingOpened
+              ? "El servicio de salas no respondió. Vuelve a intentarlo."
+              : this.connection?.open
+                ? "El enlace abrió, pero no se confirmó la partida. Recarguen ambos el juego."
+                : this.iceInfo?.relayConfigured
+                  ? "No se pudo enlazar a los pilotos. Revisa la disponibilidad del relay TURN."
+                  : "El enlace directo no se completó. Esta red puede necesitar un relay TURN configurado.",
+          );
+        }, ms);
+      };
+      this.awaitConnection = () => armTimeout(45000);
       try {
+        if (!window.VoltNetwork) throw Error("network-module-unavailable");
+        this.status("Preparando la conexión…");
+        const iceInfo = await window.VoltNetwork.prepare(this.connectAbort.signal);
+        if (token !== this.attempt) return;
+        this.iceInfo = iceInfo;
         // El sitio publicado usa HTTPS; la señalización debe usar WSS.
         const options = { debug: 1, secure: true };
+        if (iceInfo.config) options.config = iceInfo.config;
         this.peer =
-          role === "host"
-            ? new Peer("vm4-" + code.toLowerCase(), options)
-            : new Peer(options);
-        this.setupTimer = this.schedule(() => {
-          if (token === this.attempt && !this.ready) {
-            report("setup-timeout");
-            this.fail(
-              signalingOpened
-                ? "La sala respondió, pero no se pudo enlazar a los pilotos. Prueba otra red."
-                : "El servicio de salas no respondió. Prueba otra red y vuelve a intentarlo.",
-            );
-          }
-        }, 20000);
+          role === "host" ? new Peer("vm4-" + code.toLowerCase(), options) : new Peer(options);
+        this.status(role === "host" ? "Registrando la sala…" : "Buscando la sala…");
+        armTimeout(20000);
         this.peer.on("open", () => {
           if (token !== this.attempt) return;
           signalingOpened = true;
           if (role === "host") {
-            clearTimeout(this.setupTimer);
-            this.timers.delete(this.setupTimer);
+            this.clearSetupTimer();
             this.roomView();
             this.status("Sala creada. Comparte el código y espera a Flux.");
           } else {
+            this.status("Sala localizada. Enlazando a los pilotos…");
             const conn = this.peer.connect("vm4-" + code.toLowerCase(), {
               reliable: true,
               serialization: "json",
@@ -1250,7 +1294,8 @@
             "unavailable-id": "Ese código ya está ocupado. Crea otra sala.",
             "browser-incompatible":
               "Este navegador no admite WebRTC. Prueba Chrome, Edge o Firefox actualizado.",
-            network: "No se pudo conectar al servicio de salas. Prueba otra red y vuelve a intentarlo.",
+            network:
+              "No se pudo conectar al servicio de salas. Prueba otra red y vuelve a intentarlo.",
             "server-error": "El servicio de salas no está disponible. Vuelve a intentarlo.",
             "socket-error": "La red bloqueó o interrumpió la conexión con el servicio de salas.",
             "socket-closed": "Se cerró la conexión con el servicio de salas. Vuelve a intentarlo.",
@@ -1268,9 +1313,30 @@
           this.fail("Se perdió la conexión con el servicio de salas.");
         });
       } catch (error) {
+        if (token !== this.attempt) return;
         report("initialization-error", error);
-        this.fail("No se pudo iniciar WebRTC en este navegador.");
+        this.fail(
+          error.message === "network-module-unavailable"
+            ? "No se pudo cargar el módulo online. Recarga el juego."
+            : !this.peer
+              ? "No se pudieron preparar los servidores TURN. Revisa la configuración online."
+              : "No se pudo iniciar WebRTC en este navegador.",
+        );
       }
+    }
+    clearSetupTimer() {
+      clearTimeout(this.setupTimer);
+      this.timers.delete(this.setupTimer);
+      this.setupTimer = null;
+    }
+    sendWelcome() {
+      if (this.role === "host" && this.ready && this.round === 0)
+        this.send({
+          t: "welcome",
+          protocol: NET_PROTOCOL,
+          code: this.code,
+          identity: this.scene.run.identity,
+        });
     }
     reject(conn, reason) {
       const rejectOpen = () => {
@@ -1302,6 +1368,17 @@
     }
     bindConnection(conn, token) {
       this.connection = conn;
+      this.awaitConnection?.();
+      const pc = conn.peerConnection;
+      // Observadores: conservar los manejadores de negociación de PeerJS.
+      pc?.addEventListener("icecandidate", (event) => {
+        if (token !== this.attempt) return;
+        if (event.candidate?.type) this.iceCandidates.add(event.candidate.type);
+      });
+      pc?.addEventListener("icecandidateerror", (event) => {
+        if (token !== this.attempt) return;
+        this.iceErrors.add(event.errorCode);
+      });
       conn.on("open", () => {
         if (token !== this.attempt) return;
         this.lastReceive = performance.now();
@@ -1312,6 +1389,7 @@
             outfit: window.VoltExpedition.profile.outfits[1],
             name: window.VoltExpedition.profile.names[1],
           });
+        else this.sendWelcome();
         this.interval = setInterval(() => {
           if (token !== this.attempt) return;
           if (performance.now() - this.lastReceive > 8000) {
@@ -1319,6 +1397,15 @@
             return;
           }
           this.send({ t: "ping", time: performance.now() });
+          // Repetir el saludo hasta recibir confirmación; ambos extremos abren
+          // el canal en momentos distintos. La recepción es idempotente.
+          if (this.role === "guest" && !this.ready)
+            this.send({
+              t: "hello",
+              protocol: NET_PROTOCOL,
+              outfit: window.VoltExpedition.profile.outfits[1],
+              name: window.VoltExpedition.profile.names[1],
+            });
         }, 1000);
       });
       conn.on("data", (data) => {
@@ -1328,9 +1415,11 @@
         if (token === this.attempt)
           this.fail("El otro piloto se desconectó. La partida está detenida.");
       });
-      conn.on("error", () => {
-        if (token === this.attempt)
+      conn.on("error", (error) => {
+        if (token === this.attempt) {
+          this.reportConnection?.("data-connection-error", error);
           this.fail("El enlace WebRTC se interrumpió. La partida está detenida.");
+        }
       });
     }
     send(packet) {
@@ -1365,12 +1454,16 @@
       }
       if (this.role === "host") {
         if (m.t === "hello") {
-          if (this.ready) return;
           if (m.protocol !== NET_PROTOCOL) {
             this.reject(this.connection, "Las versiones del juego no coinciden.");
             return;
           }
+          if (this.ready) {
+            this.sendWelcome();
+            return;
+          }
           this.ready = true;
+          this.clearSetupTimer();
           if (window.VoltExpedition.validOutfit(m.outfit)) this.remoteOutfit = { ...m.outfit };
           this.lastReceive = performance.now();
 
@@ -1379,12 +1472,7 @@
             duo: window.VoltExpedition.profile.duoName,
             names: [window.VoltExpedition.profile.names[0], this.remoteName],
           };
-          this.send({
-            t: "welcome",
-            protocol: NET_PROTOCOL,
-            code: this.code,
-            identity: this.scene.run.identity,
-          });
+          this.sendWelcome();
           this.scene.ranking.refreshNames();
           this.roomView();
           byId("room-start").disabled = false;
@@ -1463,13 +1551,13 @@
           return;
         }
         if (m.t === "welcome" && m.protocol === NET_PROTOCOL && m.code === this.code) {
+          if (this.ready) return;
           this.ready = true;
           if (window.VoltLeague.validIdentity(m.identity))
             this.scene.run.identity = { duo: m.identity.duo, names: [...m.identity.names] };
           this.scene.ranking.refreshNames();
           this.lastReceive = performance.now();
-          clearTimeout(this.setupTimer);
-          this.timers.delete(this.setupTimer);
+          this.clearSetupTimer();
           this.roomView();
           this.status("Conectado como Flux. El anfitrión iniciará la partida.");
           return;
@@ -2931,6 +3019,8 @@
       width: SETTINGS.width,
       height: SETTINGS.height,
       backgroundColor: "#050910",
+      // El audio propio se crea al pulsar Entrar; Phaser no necesita otro contexto.
+      audio: { noAudio: true },
       render: { antialias: true },
       physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 }, debug: false } },
       scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },

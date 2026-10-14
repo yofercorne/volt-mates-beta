@@ -4,7 +4,7 @@ Dos pilotos unidos por un rayo. Seis oleadas, decisiones compartidas y el núcle
 
 ## Abrir el juego
 
-Abre index.html. Conserva a su lado style.css, game.js, expedition.js, assets.js, ranking.js y ranking-config.js. No requiere instalar nada.
+Abre index.html. Conserva a su lado style.css, game.js, expedition.js, assets.js, ranking.js, ranking-config.js, network.js y network-config.js. No requiere instalar nada.
 Phaser 3.90.0 y PeerJS 1.5.5 se cargan desde CDN, por lo que el primer inicio necesita internet.
 También se puede servir como sitio estático en GitHub Pages o Vercel.
 Conserva también favicon.svg y favicon.ico al publicar, para evitar solicitudes de iconos inexistentes.
@@ -28,6 +28,8 @@ y la disponibilidad de un servidor TURN; cambiar únicamente el alojamiento est�
 
 Para compartir un diagnóstico, copia el registro del juego y la URL/estado de la petición fallida.
 No hace falta compartir contraseñas ni claves secretas de Supabase.
+La integración de Metered / Open Relay se activa en network-config.js. Sigue [ONLINE.md](ONLINE.md)
+para obtener la clave de una credencial TURN y comprobar el relay. Todavía falta configurar esa cuenta.
 
 ## Controles
 
@@ -65,6 +67,8 @@ Si el almacenamiento está bloqueado, la colección funciona en memoria durante 
 ## Archivos
 
 - game.js: motor, física, combate, pantallas y autoridad PeerJS del anfitrión.
+- network.js / network-config.js: preparación de servidores TURN y configuración pública de la beta.
+- ONLINE.md: activación del relay y diagnóstico entre redes distintas.
 - expedition.js: mejoras, eventos, rescate, progreso y taller.
 - assets.js: imágenes y música integradas como data URI para preservar file://.
 - assets/: originales, frames, procedencia y validación.
